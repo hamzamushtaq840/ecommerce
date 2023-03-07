@@ -1,9 +1,9 @@
 import express from 'express';
 import Joi from 'joi';
+import jwt from 'jsonwebtoken'
 import { userModel } from '../models/userModel.js'
 import { tryCatch } from '../utils/tryCatch.js';
 import AppError from '../utils/AppError.js';
-
 
 const userSchema = Joi.object({
     name: Joi.string().required(),
@@ -39,7 +39,7 @@ export const register = tryCatch(async (req, res, next) => {
 
 
 export const login = tryCatch(async (req, res) => {
-    const { error, value } = loginSchema.validate(req.body);
+    const { error } = loginSchema.validate(req.body);
     if (error) {
         throw new AppError('MISSING_FIELD', `The '${error.details[0].context.label}' field is required.`, 400);
     }
@@ -57,5 +57,22 @@ export const login = tryCatch(async (req, res) => {
         throw new AppError('invalid_password', 'The password you entered is incorrect', 401)
     }
 
-    res.status(200).json({ message: 'Login successful' });
+    const accessToken = jwt.sign(
+        { userId: user._id.toString() },
+        process.env.JWT_SECRET,
+        {
+            //5 to 15 min in production
+            expiresIn: '30s'
+        }
+    );
+    const refreshToken = jwt.sign(
+        { userId: user._id.toString() },
+        process.env.JWT_REFRESH,
+        {
+            //5 to 15 min in production
+            expiresIn: '1d'
+        }
+    );
+    res.cookie('jwt', refreshToken, { secure: true, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
+    res.status(200).json({ message: 'Login successful', token: accessToken, userId: user._id.toString() });
 });
