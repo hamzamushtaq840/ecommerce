@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import { userModel } from '../models/userModel.js'
 import { tryCatch } from '../utils/tryCatch.js';
 import AppError from '../utils/AppError.js';
+import { RefreshToken } from '../models/refreshTokenModel.js';
 
 const userSchema = Joi.object({
     name: Joi.string().required(),
@@ -69,10 +70,13 @@ export const login = tryCatch(async (req, res) => {
         { userId: user._id.toString() },
         process.env.JWT_REFRESH,
         {
-            //5 to 15 min in production
             expiresIn: '1d'
         }
     );
+    // save refresh token to database
+    await RefreshToken.create({ userId: user._id, token: refreshToken });
+
+    //maxAge is 24 hours
     res.cookie('jwt', refreshToken, { secure: true, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
     res.status(200).json({ message: 'Login successful', token: accessToken, userId: user._id.toString() });
 });

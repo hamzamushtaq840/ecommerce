@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-function verifyToken(req, res, next) {
-
+function verifyJWT(req, res, next) {
     const bearerHeader = req.headers["authorization"];
 
     if (typeof bearerHeader !== "undefined") {
@@ -20,4 +19,4 @@ function verifyToken(req, res, next) {
     else { return res.status(401).json({ error: "Unauthorized" }); }
 }
 
-export default verifyToken
+export default verifyJWT
