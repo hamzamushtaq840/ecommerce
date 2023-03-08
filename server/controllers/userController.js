@@ -59,11 +59,11 @@ export const login = tryCatch(async (req, res) => {
     }
 
     const accessToken = jwt.sign(
-        { userId: user._id.toString() },
+        { UserInfo: { userId: user._id.toString(), roles: user.roles } },
         process.env.JWT_SECRET,
         {
             //5 to 15 min in production
-            expiresIn: '30s'
+            expiresIn: '1H'
         }
     );
     const refreshToken = jwt.sign(
@@ -74,9 +74,9 @@ export const login = tryCatch(async (req, res) => {
         }
     );
     // save refresh token to database
-    await RefreshToken.create({ userId: user._id, token: refreshToken });
+    await RefreshToken.create({ userId: user._id, token: refreshToken, roles: user.roles });
 
     //maxAge is 24 hours
-    res.cookie('jwt', refreshToken, { secure: true, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
-    res.status(200).json({ message: 'Login successful', token: accessToken, userId: user._id.toString() });
+    res.cookie('jwt', refreshToken, { secure: true, sameSite: 'None', httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
+    res.status(200).json({ message: 'Login successful', token: accessToken, userId: user._id.toString(), name: user.name, roles: user.roles });
 });

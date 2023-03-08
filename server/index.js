@@ -6,7 +6,7 @@ import { corsOptions } from './config/corsOptions.js'
 import { errorHandler } from './middlewares/errorHandler.js'
 import user from './routes/user.js'
 import books from './routes/books.js'
-import refreshToken from './routes/refreshToken.js'
+import refreshToken from './routes/token.js'
 import verifyJWT from './middlewares/verifyJWT.js'
 import cookieParser from 'cookie-parser'
 const app = express()

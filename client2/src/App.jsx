@@ -1,17 +1,19 @@
 import axios from 'axios';
-import { useState } from 'react';
-import './App.css';
+import { useContext, useState } from 'react';
+import AuthContext from './context/AuthProvider';
 
 function App() {
+  const { setAuth } = useContext(AuthContext)
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     axios
       .post('http://localhost:5000/user/login', { email, password })
       .then((response) => {
         console.log(response.data);
+        setAuth(response.data)
       })
       .catch((error) => {
         // Handle error

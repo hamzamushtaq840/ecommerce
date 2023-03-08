@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { UserRole } from '../config/role_list.js';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -13,6 +14,11 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    roles: {
+        type: [Number],
+        enum: Object.values(UserRole).map(role => role.valueOf()),
+        default: [UserRole.USER.valueOf()],
     },
     createdAt: {
         type: Date,
